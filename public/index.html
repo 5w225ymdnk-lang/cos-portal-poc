@@ -3,103 +3,212 @@
 
 <head>
     <title>Create CoS Application</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        input,
+        textarea,
+        button {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #error {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>Create CoS Application</h1>
+    <h1>Create CoS Application</h1>
 
-<form id="appForm">
+    <div id="error"></div>
 
-<input
-id="bandName"
-placeholder="Band Name"
-required>
+    <form id="appForm">
 
-<br><br>
+        <input
+            id="bandName"
+            placeholder="Band Name"
+            required
+            maxlength="100">
 
-<input
-id="contactName"
-placeholder="Contact Name"
-required>
+        <br><br>
 
-<br><br>
+        <input
+            id="contactName"
+            placeholder="Contact Name"
+            required
+            maxlength="100">
 
-<input
-id="contactEmail"
-placeholder="Contact Email"
-required>
+        <br><br>
 
-<br><br>
+        <input
+            id="contactEmail"
+            type="email"
+            placeholder="Contact Email"
+            required>
 
-<input
-id="memberCount"
-type="number"
-placeholder="Total People"
-required>
+        <br><br>
 
-<br><br>
+        <input
+            id="memberCount"
+            type="number"
+            placeholder="Total People"
+            required
+            min="1"
+            max="500">
 
-<textarea
-id="venueList"
-placeholder="Venue List"
-rows="5"
-cols="50"></textarea>
+        <br><br>
 
-<br><br>
+        <textarea
+            id="venueList"
+            placeholder="Venue List"
+            rows="5"
+            required></textarea>
 
-<button>Create Application</button>
+        <br><br>
 
-</form>
+        <button>Create Application</button>
 
-<script>
+    </form>
 
-document
-.getElementById("appForm")
-.addEventListener("submit", async e=>{
+    <script>
 
-e.preventDefault();
+        document
+            .getElementById("appForm")
+            .addEventListener(
+                "submit",
+                async e => {
 
-const response =
-await fetch("/api/application",{
+                    e.preventDefault();
 
-method:"POST",
+                    const bandName =
+                        document
+                            .getElementById("bandName")
+                            .value
+                            .trim();
 
-headers:{
-"Content-Type":"application/json"
-},
+                    const contactName =
+                        document
+                            .getElementById("contactName")
+                            .value
+                            .trim();
 
-body:JSON.stringify({
+                    const contactEmail =
+                        document
+                            .getElementById("contactEmail")
+                            .value
+                            .trim();
 
-bandName:
-document.getElementById("bandName").value,
+                    const memberCount =
+                        parseInt(
+                            document
+                                .getElementById("memberCount")
+                                .value
+                        );
 
-contactName:
-document.getElementById("contactName").value,
+                    const venueList =
+                        document
+                            .getElementById("venueList")
+                            .value
+                            .trim();
 
-contactEmail:
-document.getElementById("contactEmail").value,
+                    const errorElement =
+                        document
+                            .getElementById("error");
 
-memberCount:
-document.getElementById("memberCount").value,
+                    errorElement.innerText = "";
 
-venueList:
-document.getElementById("venueList").value
+                    if (!bandName) {
+                        errorElement.innerText =
+                            "Band name is required";
+                        return;
+                    }
 
-})
+                    if (!contactName) {
+                        errorElement.innerText =
+                            "Contact name is required";
+                        return;
+                    }
 
-});
+                    const emailRegex =
+                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const data =
-await response.json();
+                    if (
+                        !emailRegex.test(
+                            contactEmail
+                        )
+                    ) {
+                        errorElement.innerText =
+                            "Please enter a valid email address";
+                        return;
+                    }
 
-window.location =
-"/application.html?id=" +
-data.applicationId;
+                    if (
+                        isNaN(memberCount) ||
+                        memberCount < 1
+                    ) {
+                        errorElement.innerText =
+                            "Member count must be at least 1";
+                        return;
+                    }
 
-});
+                    if (!venueList) {
+                        errorElement.innerText =
+                            "Venue list is required";
+                        return;
+                    }
 
-</script>
+                    try {
+
+                        const response =
+                            await fetch(
+                                "/api/application",
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        bandName,
+                                        contactName,
+                                        contactEmail,
+                                        memberCount,
+                                        venueList
+                                    })
+                                }
+                            );
+
+                        const data =
+                            await response.json();
+
+                        window.location =
+                            "/application.html?id=" +
+                            data.applicationId;
+
+                    } catch (error) {
+
+                        errorElement.innerText =
+                            "Unable to create application.";
+
+                    }
+
+                }
+            );
+
+    </script>
 
 </body>
+
 </html>

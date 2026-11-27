@@ -81,6 +81,44 @@ const upload = multer({ storage });
 
 app.post("/api/application", (req, res) => {
 
+    const {
+        bandName,
+        contactName,
+        contactEmail,
+        memberCount,
+        venueList
+    } = req.body;
+
+    if (
+        !bandName ||
+        !contactName ||
+        !contactEmail ||
+        !venueList
+    ) {
+        return res.status(400).json({
+            error: "All fields are required"
+        });
+    }
+
+    const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(contactEmail)) {
+        return res.status(400).json({
+            error: "Invalid email address"
+        });
+    }
+
+    if (
+        isNaN(memberCount) ||
+        Number(memberCount) < 1 ||
+        Number(memberCount) > 500
+    ) {
+        return res.status(400).json({
+            error: "Invalid member count"
+        });
+    }
+
     const applicationId =
         "COS-" + Date.now();
 
@@ -101,11 +139,11 @@ app.post("/api/application", (req, res) => {
         `,
         [
             applicationId,
-            req.body.bandName,
-            req.body.contactName,
-            req.body.contactEmail,
-            req.body.memberCount,
-            req.body.venueList,
+            bandName,
+            contactName,
+            contactEmail,
+            memberCount,
+            venueList,
             new Date().toISOString()
         ],
         err => {
@@ -162,6 +200,30 @@ app.post(
     "/api/member",
     upload.single("passport"),
     (req, res) => {
+
+        if (!req.body.fullName) {
+            return res.status(400).json({
+                error: "Full name is required"
+            });
+        }
+
+        if (!req.body.nationality) {
+            return res.status(400).json({
+                error: "Nationality is required"
+            });
+        }
+
+        if (!req.body.passportNumber) {
+            return res.status(400).json({
+                error: "Passport number is required"
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                error: "Passport upload is required"
+            });
+        }
 
         db.run(
             `
