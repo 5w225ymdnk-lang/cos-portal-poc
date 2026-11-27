@@ -1,6 +1,7 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -122,11 +123,15 @@ app.post("/api/application", (req, res) => {
     const applicationId =
         "COS-" + Date.now();
 
+    const accessToken =
+        crypto.randomUUID();
+
     db.run(
         `
         INSERT INTO applications
         (
             applicationId,
+            accessToken,
             bandName,
             contactName,
             contactEmail,
@@ -135,10 +140,11 @@ app.post("/api/application", (req, res) => {
             createdAt
         )
         VALUES
-        (?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?)
         `,
         [
             applicationId,
+            accessToken,
             bandName,
             contactName,
             contactEmail,
@@ -155,7 +161,8 @@ app.post("/api/application", (req, res) => {
             }
 
             res.json({
-                applicationId
+                applicationId,
+                accessToken
             });
 
         }
@@ -229,6 +236,33 @@ app.get(
                         .json({
                             error: err.message
                         });
+                }
+
+                res.json(row);
+
+            }
+        );
+
+    }
+);
+
+app.get(
+    "/api/application/token/:token",
+    (req, res) => {
+
+        db.get(
+            `
+            SELECT *
+            FROM applications
+            WHERE accessToken = ?
+            `,
+            [req.params.token],
+            (err, row) => {
+
+                if (err) {
+                    return res.status(500).json({
+                        error: err.message
+                    });
                 }
 
                 res.json(row);

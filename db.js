@@ -22,6 +22,14 @@ db.serialize(() => {
         )
     `);
 
+    db.run(
+        `
+        ALTER TABLE applications
+        ADD COLUMN accessToken TEXT
+        `,
+        err => {}
+    );
+
     db.run(`
         CREATE TABLE IF NOT EXISTS members (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

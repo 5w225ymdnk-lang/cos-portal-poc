@@ -174,10 +174,10 @@ Save Member
 
 <script>
 
-const appId =
+const token =
 new URLSearchParams(
 window.location.search
-).get("id");
+).get("token");
 
 let appInfo;
 
@@ -185,11 +185,14 @@ async function init(){
 
 const response =
 await fetch(
-"/api/application/" + appId
+"/api/application/" + token
 );
 
 appInfo =
 await response.json();
+
+const appId =
+    appInfo.applicationId;
 
 document
 .getElementById("title")
