@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Application</title>
+<style>
+body{
+font-family:Arial;
+max-width:1000px;
+margin:auto;
+padding:20px;
+}
+
+.progress{
+height:30px;
+background:#ddd;
+}
+
+.bar{
+height:30px;
+background:green;
+width:0%;
+}
+</style>
+</head>
+
+<body>
+
+<h1 id="title"></h1>
+
+<p id="stats"></p>
+
+<div class="progress">
+<div
+id="bar"
+class="bar">
+</div>
+</div>
+
+<hr>
+
+<form
+id="memberForm"
+enctype="multipart/form-data">
+
+<h2>Add Member</h2>
+
+<input name="fullName" placeholder="Full Name" required>
+<br><br>
+
+<input name="nationality" placeholder="Nationality" required>
+<br><br>
+
+<input name="placeOfBirth" placeholder="Place Of Birth">
+<br><br>
+
+<input name="countryOfBirth" placeholder="Country Of Birth">
+<br><br>
+
+<textarea
+name="homeAddress"
+placeholder="Home Address"></textarea>
+
+<br><br>
+
+<label>First Entry Date</label>
+<br>
+<input type="date" name="firstEntryDate">
+
+<br><br>
+
+<label>Final Exit Date</label>
+<br>
+<input type="date" name="finalExitDate">
+
+<br><br>
+
+<input
+type="number"
+name="showCount"
+placeholder="Number Of Shows">
+
+<br><br>
+
+<input
+name="earnings"
+placeholder="Earnings">
+
+<br><br>
+
+<input
+name="jobTitle"
+placeholder="Job Title">
+
+<br><br>
+
+<select name="travellingFromIreland">
+<option>No</option>
+<option>Yes</option>
+</select>
+
+<br><br>
+
+<select name="reEnteringUk">
+<option>No</option>
+<option>Yes</option>
+</select>
+
+<br><br>
+
+<label>First Exit Date</label>
+<br>
+<input type="date" name="firstExitDate">
+
+<br><br>
+
+<label>Re-entry Date</label>
+<br>
+<input type="date" name="reEntryDate">
+
+<br><br>
+
+<input
+name="passportNumber"
+placeholder="Passport Number">
+
+<br><br>
+
+<label>Passport Expiry</label>
+<br>
+
+<input
+type="date"
+name="passportExpiry">
+
+<br><br>
+
+<label>Passport Upload</label>
+<br>
+
+<input
+type="file"
+name="passport"
+required>
+
+<br><br>
+
+<button>
+Save Member
+</button>
+
+</form>
+
+<hr>
+
+<h2>Current Members</h2>
+
+<div id="members"></div>
+
+<script>
+
+const appId =
+new URLSearchParams(
+window.location.search
+).get("id");
+
+let appInfo;
+
+async function init(){
+
+const response =
+await fetch(
+"/api/application/" + appId
+);
+
+appInfo =
+await response.json();
+
+document
+.getElementById("title")
+.innerText =
+appInfo.bandName;
+
+loadMembers();
+
+}
+
+async function loadMembers(){
+
+const response =
+await fetch(
+"/api/members/" + appId
+);
+
+const members =
+await response.json();
+
+document
+.getElementById("stats")
+.innerHTML =
+`
+Required:
+${appInfo.memberCount}
+|
+Added:
+${members.length}
+`;
+
+const percent =
+Math.round(
+(members.length /
+appInfo.memberCount)
+* 100
+);
+
+document
+.getElementById("bar")
+.style.width =
+percent + "%";
+
+let html = "";
+
+members.forEach(m=>{
+
+html += `
+<div style="
+border:1px solid #ccc;
+padding:10px;
+margin:10px 0;
+">
+
+<b>${m.fullName}</b>
+
+<br>
+
+${m.jobTitle}
+
+<br>
+
+${m.passportNumber}
+
+</div>
+`;
+
+});
+
+document
+.getElementById("members")
+.innerHTML =
+html;
+
+}
+
+document
+.getElementById("memberForm")
+.addEventListener(
+"submit",
+async e=>{
+
+e.preventDefault();
+
+const form =
+new FormData(e.target);
+
+form.append(
+"applicationId",
+appId
+);
+
+await fetch(
+"/api/member",
+{
+method:"POST",
+body:form
+}
+);
+
+e.target.reset();
+
+loadMembers();
+
+}
+);
+
+init();
+
+</script>
+
+</body>
+</html>

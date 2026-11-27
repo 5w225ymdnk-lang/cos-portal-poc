@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Create CoS Application</title>
+</head>
+
+<body>
+
+<h1>Create CoS Application</h1>
+
+<form id="appForm">
+
+<input
+id="bandName"
+placeholder="Band Name"
+required>
+
+<br><br>
+
+<input
+id="contactName"
+placeholder="Contact Name"
+required>
+
+<br><br>
+
+<input
+id="contactEmail"
+placeholder="Contact Email"
+required>
+
+<br><br>
+
+<input
+id="memberCount"
+type="number"
+placeholder="Total People"
+required>
+
+<br><br>
+
+<textarea
+id="venueList"
+placeholder="Venue List"
+rows="5"
+cols="50"></textarea>
+
+<br><br>
+
+<button>Create Application</button>
+
+</form>
+
+<script>
+
+document
+.getElementById("appForm")
+.addEventListener("submit", async e=>{
+
+e.preventDefault();
+
+const response =
+await fetch("/api/application",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+bandName:
+document.getElementById("bandName").value,
+
+contactName:
+document.getElementById("contactName").value,
+
+contactEmail:
+document.getElementById("contactEmail").value,
+
+memberCount:
+document.getElementById("memberCount").value,
+
+venueList:
+document.getElementById("venueList").value
+
+})
+
+});
+
+const data =
+await response.json();
+
+window.location =
+"/application.html?id=" +
+data.applicationId;
+
+});
+
+</script>
+
+</body>
+</html>

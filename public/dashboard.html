@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Dashboard</title>
+</head>
+
+<body>
+
+<h1>Applications Dashboard</h1>
+
+<div id="apps"></div>
+
+<script>
+
+async function load(){
+
+const response =
+await fetch("/api/dashboard");
+
+const apps =
+await response.json();
+
+let html = "";
+
+apps.forEach(app => {
+
+const colour =
+app.progress >= 100
+? "#0b8f00"
+: "#d77d00";
+
+html += `
+<div
+style="
+background:${colour};
+color:white;
+padding:15px;
+margin-bottom:10px;
+">
+
+<b>${app.bandName}</b>
+
+<br>
+
+${app.applicationId}
+
+<br>
+
+Members:
+${app.addedMembers}
+of
+${app.memberCount}
+
+<br>
+
+Progress:
+${app.progress}%
+
+</div>
+`;
+
+});
+
+document
+.getElementById("apps")
+.innerHTML = html;
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>

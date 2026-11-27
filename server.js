@@ -1,0 +1,254 @@
+const express = require("express");
+const sqlite3 = require("sqlite3").verbose();
+const multer = require("multer");
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+
+const db = new sqlite3.Database("database.db");
+
+db.serialize(() => {
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            applicationId TEXT UNIQUE,
+            bandName TEXT,
+            contactName TEXT,
+            contactEmail TEXT,
+            memberCount INTEGER,
+            venueList TEXT,
+            createdAt TEXT
+        )
+    `);
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS members (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            applicationId TEXT,
+
+            fullName TEXT,
+            nationality TEXT,
+            placeOfBirth TEXT,
+            countryOfBirth TEXT,
+            homeAddress TEXT,
+
+            firstEntryDate TEXT,
+            finalExitDate TEXT,
+
+            showCount INTEGER,
+            earnings TEXT,
+            jobTitle TEXT,
+
+            travellingFromIreland TEXT,
+            reEnteringUk TEXT,
+
+            firstExitDate TEXT,
+            reEntryDate TEXT,
+
+            passportNumber TEXT,
+            passportExpiry TEXT,
+
+            passportFile TEXT
+        )
+    `);
+
+});
+
+const storage = multer.diskStorage({
+    destination: "./uploads",
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+app.post("/api/application", (req, res) => {
+
+    const applicationId = "COS-" + Date.now();
+
+    db.run(
+        `
+        INSERT INTO applications
+        (
+            applicationId,
+            bandName,
+            contactName,
+            contactEmail,
+            memberCount,
+            venueList,
+            createdAt
+        )
+        VALUES (?,?,?,?,?,?,?)
+        `,
+        [
+            applicationId,
+            req.body.bandName,
+            req.body.contactName,
+            req.body.contactEmail,
+            req.body.memberCount,
+            req.body.venueList,
+            new Date().toISOString()
+        ]
+    );
+
+    res.json({
+        applicationId
+    });
+
+});
+
+app.get("/api/application/:id", (req, res) => {
+
+    db.get(
+        `
+        SELECT *
+        FROM applications
+        WHERE applicationId = ?
+        `,
+        [req.params.id],
+        (err, row) => {
+            res.json(row);
+        }
+    );
+
+});
+
+app.post(
+    "/api/member",
+    upload.single("passport"),
+    (req, res) => {
+
+        db.run(
+            `
+            INSERT INTO members
+            (
+                applicationId,
+                fullName,
+                nationality,
+                placeOfBirth,
+                countryOfBirth,
+                homeAddress,
+                firstEntryDate,
+                finalExitDate,
+                showCount,
+                earnings,
+                jobTitle,
+                travellingFromIreland,
+                reEnteringUk,
+                firstExitDate,
+                reEntryDate,
+                passportNumber,
+                passportExpiry,
+                passportFile
+            )
+            VALUES
+            (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            `,
+            [
+                req.body.applicationId,
+                req.body.fullName,
+                req.body.nationality,
+                req.body.placeOfBirth,
+                req.body.countryOfBirth,
+                req.body.homeAddress,
+                req.body.firstEntryDate,
+                req.body.finalExitDate,
+                req.body.showCount,
+                req.body.earnings,
+                req.body.jobTitle,
+                req.body.travellingFromIreland,
+                req.body.reEnteringUk,
+                req.body.firstExitDate,
+                req.body.reEntryDate,
+                req.body.passportNumber,
+                req.body.passportExpiry,
+                req.file ? req.file.filename : null
+            ]
+        );
+
+        res.json({
+            success: true
+        });
+
+    });
+
+app.get("/api/members/:applicationId", (req, res) => {
+
+    db.all(
+        `
+        SELECT *
+        FROM members
+        WHERE applicationId = ?
+        `,
+        [req.params.applicationId],
+        (err, rows) => {
+            res.json(rows);
+        }
+    );
+
+});
+
+app.get("/api/dashboard", (req, res) => {
+
+    db.all(
+        `SELECT * FROM applications`,
+        [],
+        (err, applications) => {
+
+            if (!applications.length)
+                return res.json([]);
+
+            let results = [];
+            let pending = applications.length;
+
+            applications.forEach(appItem => {
+
+                db.all(
+                    `
+                    SELECT *
+                    FROM members
+                    WHERE applicationId = ?
+                    `,
+                    [appItem.applicationId],
+                    (err, members) => {
+
+                        const progress =
+                            Math.round(
+                                (members.length /
+                                    appItem.memberCount) * 100
+                            );
+
+                        results.push({
+                            ...appItem,
+                            progress:
+                                progress > 100
+                                    ? 100
+                                    : progress,
+                            addedMembers:
+                                members.length
+                        });
+
+                        pending--;
+
+                        if (pending === 0)
+                            res.json(results);
+
+                    }
+                );
+
+            });
+
+        }
+    );
+
+});
+
+app.listen(3000, () => {
+    console.log("Running on http://localhost:3000");
+});
