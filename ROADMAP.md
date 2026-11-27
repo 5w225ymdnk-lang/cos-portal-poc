@@ -1,189 +1,374 @@
-# COS Portal Roadmap
+# COS Portal - Product Roadmap
 
-## ✅ Sprint 1 - Core Application (Complete)
+## Vision
 
-### Application Management
-- [x] Create application
-- [x] Generate application IDs
-- [x] Store application data in SQLite
-- [x] Application search
+Create a secure, self-service Certificate of Sponsorship (CoS) management platform that allows administrators to manage applications and applicants to submit and maintain information through secure magic-link access.
 
-### Member Management
+---
+
+# ✅ Sprint 1 - Core MVP (Complete)
+
+## Database
+
+- [x] SQLite database
+- [x] Applications table
+- [x] Members table
+- [x] Automatic application IDs
+
+## Application Creation
+
+- [x] Create application form
+- [x] Generate application records
+- [x] Store contact details
+- [x] Store venue information
+- [x] Store member counts
+
+## Member Management
+
 - [x] Add members
 - [x] View members
 - [x] Delete members
-- [x] Member validation
+- [x] Store passport data
+- [x] Upload passport files
 
-### File Uploads
-- [x] Passport uploads
-- [x] File storage with Multer
+## Dashboard
 
-### Dashboard
-- [x] Application dashboard
+- [x] Application listing
 - [x] Progress tracking
-- [x] Member counts
-- [x] Application deletion
+- [x] Search applications
+- [x] Delete applications
 
-### Drafts
+## Drafts
+
 - [x] Save draft applications
 - [x] Resume draft applications
 
 ---
 
-## ✅ Sprint 2 - Admin Portal & Magic Links (Complete)
+# ✅ Sprint 2 - Admin Portal & Security (Complete)
 
-### Authentication
+## Authentication
+
 - [x] Admin login
 - [x] Session management
-- [x] Logout functionality
-- [x] Protected dashboard API
+- [x] Logout
+- [x] Protected APIs
 
-### Application Access
-- [x] UUID-based access tokens
-- [x] Magic link generation
+## Magic Links
+
+- [x] UUID token generation
+- [x] Unique access links
 - [x] Token validation
-- [x] Invalid token protection (404)
+- [x] Invalid token handling
 
-### Admin Workflow
-- [x] Dashboard as main entry point
-- [x] Admin-only application creation
+## Dashboard
+
+- [x] Dashboard as root route
+- [x] Application status display
+- [x] Progress bars
 - [x] Copy magic links
-- [x] Application management
+- [x] Open application links
 
-### Security Improvements
-- [x] Protected application deletion
-- [x] Session authentication checks
-- [x] Applicant/admin workflow separation
+## Security Improvements
 
-### User Journey
-- [x] Admin creates application
-- [x] Magic link generated
-- [x] Applicant accesses application
-- [x] Applicant submits members
-- [x] Dashboard updates progress
+- [x] Admin protected delete actions
+- [x] Session checks
+- [x] Token validation
 
 ---
 
-## 🚀 Sprint 3 - Security & Production Readiness
+# ✅ Sprint 2.5 - Applicant Portal (Complete)
 
-### Authentication
-- [ ] Move credentials to environment variables
-- [ ] Replace hard-coded admin password
-- [ ] Add bcrypt password hashing
-- [ ] Password reset capability
-- [ ] Session timeout handling
+## Applicant Dashboard
 
-### Security
-- [ ] Restrict upload file types
-- [ ] Restrict upload file size
-- [ ] Rate limiting
-- [ ] CSRF protection
-- [ ] Security headers (Helmet)
-- [ ] Input sanitisation
+- [x] Applicant dashboard page
+- [x] Magic links open dashboard
+- [x] Progress display
+- [x] Member count display
+- [x] Completion tracking
 
-### Admin Protection
-- [ ] Lock down dashboard.html
-- [ ] Lock down create-application.html
-- [ ] Remove public access to admin pages
-- [ ] Admin middleware for all admin routes
+## Applicant Workflow
 
-### Applicant Experience
-- [ ] Autosave member form
-- [ ] Better error messages
-- [ ] Completion confirmation screen
-- [ ] Resume incomplete applications
+- [x] Applicant dashboard
+- [x] Add member button
+- [x] Back to dashboard navigation
+- [x] Redirect after save
+
+## User Experience
+
+- [x] Separate admin and applicant experiences
+- [x] Dashboard → Application workflow
+- [x] Clear user journey
 
 ---
 
-## 🚀 Sprint 4 - CoS Workflow Features
+# 🚀 Sprint 3 - Member Management
 
-### Application States
+## Member Editing
+
+- [ ] Edit member information
+- [ ] Update passport details
+- [ ] Replace passport uploads
+- [ ] View individual member records
+- [ ] Member detail page
+
+## Applicant Improvements
+
+- [ ] Autosave member forms
+- [ ] Save incomplete member forms
+- [ ] Unsaved changes warnings
+- [ ] Form success messages
+- [ ] Better validation messages
+
+## Completion Features
+
+- [ ] Mark application complete
+- [ ] Applicant completion screen
+- [ ] Lock completed applications
+- [ ] Confirmation summary page
+
+---
+
+# 🚀 Sprint 4 - CoS Workflow
+
+## Application Status System
+
 - [ ] Draft
 - [ ] Awaiting Information
-- [ ] Complete
+- [ ] In Progress
+- [ ] Completed
 - [ ] Submitted
 - [ ] Approved
 - [ ] Rejected
 
-### Admin Features
-- [ ] Internal notes
+## Internal Notes
+
+- [ ] Admin notes
 - [ ] Staff comments
-- [ ] Audit history
-- [ ] Activity timeline
+- [ ] Internal reminders
+- [ ] Application history
 
-### Documents
+## Application Reviews
+
+- [ ] Review queue
+- [ ] Missing information flags
+- [ ] Validation checks
+- [ ] Submission checklist
+
+---
+
+# 🚀 Sprint 5 - Document Management
+
+## File Management
+
 - [ ] Download uploaded passports
-- [ ] Document checklist
-- [ ] Missing document warnings
+- [ ] Replace uploaded documents
+- [ ] Delete uploaded files
+- [ ] Preview uploaded files
+
+## Validation
+
+- [ ] File type restrictions
+- [ ] File size restrictions
+- [ ] Passport expiry warnings
+- [ ] Missing document checks
+
+## Exports
+
+- [ ] PDF application pack
+- [ ] Member roster export
+- [ ] CSV export
+- [ ] Audit report export
 
 ---
 
-## 🚀 Sprint 5 - Email Automation
+# 🚀 Sprint 6 - Email Automation
 
-### Applicant Emails
-- [ ] Magic link emails
-- [ ] Recovery emails
+## Applicant Emails
+
+- [ ] Send magic links automatically
 - [ ] Reminder emails
-- [ ] Completion emails
+- [ ] Recovery emails
+- [ ] Completion confirmation emails
 
-### Admin Emails
-- [ ] Application created notifications
-- [ ] Application completed notifications
+## Admin Emails
+
+- [ ] Application created alerts
+- [ ] Application completed alerts
 - [ ] Missing information alerts
+- [ ] Daily activity summary
+
+## Templates
+
+- [ ] Email template management
+- [ ] Custom email branding
 
 ---
 
-## 🚀 Sprint 6 - Deployment
+# 🚀 Sprint 7 - Security & Compliance
 
-### Infrastructure
+## Authentication
+
 - [ ] Environment variables
+- [ ] Remove hard-coded credentials
+- [ ] bcrypt password hashing
+- [ ] Password reset workflow
+- [ ] Session expiry
+
+## Security
+
+- [ ] Helmet middleware
+- [ ] CSRF protection
+- [ ] Rate limiting
+- [ ] Input sanitisation
+- [ ] Upload virus scanning
+
+## Access Control
+
+- [ ] Fully protect dashboard.html
+- [ ] Fully protect create-application.html
+- [ ] Role-based permissions
+- [ ] Audit logging
+
+---
+
+# 🚀 Sprint 8 - Production Deployment
+
+## Infrastructure
+
+- [ ] Production environment
 - [ ] HTTPS
 - [ ] SSL certificate
-- [ ] Reverse proxy (Nginx)
-- [ ] Logging
-- [ ] Monitoring
+- [ ] Reverse proxy
+- [ ] Environment configuration
 
-### Hosting
+## Hosting
+
 - [ ] VPS deployment
+- [ ] Database backups
 - [ ] Automated backups
-- [ ] Database backup strategy
-- [ ] Custom domain
+- [ ] Monitoring
+- [ ] Error logging
+
+## Operations
+
+- [ ] Disaster recovery plan
+- [ ] Backup restoration testing
+- [ ] Performance monitoring
 
 ---
 
-# Sprint 2 Deliverable
+# 🚀 Sprint 9 - Commercial Features
 
-✅ Admin Login
+## Client Management
 
-✅ Dashboard
+- [ ] Multiple organisations
+- [ ] Client accounts
+- [ ] Organisation branding
 
-✅ Create Application
+## Billing
 
-✅ Generate Magic Link
+- [ ] Subscription plans
+- [ ] Stripe integration
+- [ ] Usage tracking
+- [ ] Invoicing
 
-✅ Applicant Access via Token
+## Reporting
+
+- [ ] Application analytics
+- [ ] Usage dashboards
+- [ ] Completion rates
+- [ ] Exportable reports
+
+---
+
+# Current Architecture
+
+```text
+ADMIN
+
+login.html
+    ↓
+
+dashboard.html
+    ├── Search Applications
+    ├── Create Application
+    ├── View Progress
+    ├── Delete Applications
+    └── Generate Magic Links
+
+create-application.html
+
+────────────────────────────
+
+APPLICANT
+
+applicant.html?token=xxxxx
+    ├── View Progress
+    ├── View Submitted Members
+    ├── Add Member
+    └── Completion Status
+
+application.html?token=xxxxx
+    └── Member Entry Form
+```
+
+---
+
+# Current User Journey
+
+```text
+Admin Login
+    ↓
+Dashboard
+    ↓
+Create Application
+    ↓
+Generate Magic Link
+    ↓
+Applicant Dashboard
+    ↓
+Add Member
+    ↓
+Save Member
+    ↓
+Applicant Dashboard
+    ↓
+Application Complete
+```
+
+---
+
+# Current Release Status
+
+### Version
+
+**v0.3.0 - Applicant Portal MVP**
+
+### Completed
+
+✅ Admin Portal
+
+✅ Magic Links
+
+✅ Applicant Dashboard
 
 ✅ Member Submission
 
 ✅ Progress Tracking
 
-✅ Application Management
+✅ Session Authentication
 
-✅ Logout
+✅ SQLite Persistence
 
----
+✅ Passport Uploads
 
-# Pre-Push Checklist
+### Next Milestone
 
-- [ ] Fix email regex
-- [ ] Rename `index.html` → `create-application.html`
-- [ ] Remove dashboard link from `application.html`
-- [ ] Remove copy-link button from `application.html`
-- [ ] Test login
-- [ ] Test dashboard
-- [ ] Test create application
-- [ ] Test magic link
-- [ ] Test member creation
-- [ ] Test delete member
-- [ ] Test delete application
-- [ ] Test logout
+🎯 **v0.4.0 - Member Management**
+
+Primary focus:
+
+- Member editing
+- Application completion workflow
+- Improved applicant experience
