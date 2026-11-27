@@ -59,18 +59,30 @@ db.serialize(() => {
 
 });
 
+/* ==========================
+   FILE UPLOADS
+========================== */
+
 const storage = multer.diskStorage({
     destination: "./uploads",
     filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
+        cb(
+            null,
+            Date.now() + "-" + file.originalname
+        );
     }
 });
 
 const upload = multer({ storage });
 
+/* ==========================
+   APPLICATIONS
+========================== */
+
 app.post("/api/application", (req, res) => {
 
-    const applicationId = "COS-" + Date.now();
+    const applicationId =
+        "COS-" + Date.now();
 
     db.run(
         `
@@ -84,7 +96,8 @@ app.post("/api/application", (req, res) => {
             venueList,
             createdAt
         )
-        VALUES (?,?,?,?,?,?,?)
+        VALUES
+        (?,?,?,?,?,?,?)
         `,
         [
             applicationId,
@@ -94,30 +107,56 @@ app.post("/api/application", (req, res) => {
             req.body.memberCount,
             req.body.venueList,
             new Date().toISOString()
-        ]
-    );
+        ],
+        err => {
 
-    res.json({
-        applicationId
-    });
+            if (err) {
+                return res
+                    .status(500)
+                    .json({ error: err.message });
+            }
 
-});
+            res.json({
+                applicationId
+            });
 
-app.get("/api/application/:id", (req, res) => {
-
-    db.get(
-        `
-        SELECT *
-        FROM applications
-        WHERE applicationId = ?
-        `,
-        [req.params.id],
-        (err, row) => {
-            res.json(row);
         }
     );
 
 });
+
+app.get(
+    "/api/application/:id",
+    (req, res) => {
+
+        db.get(
+            `
+            SELECT *
+            FROM applications
+            WHERE applicationId = ?
+            `,
+            [req.params.id],
+            (err, row) => {
+
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
+                        });
+                }
+
+                res.json(row);
+
+            }
+        );
+
+    }
+);
+
+/* ==========================
+   MEMBERS
+========================== */
 
 app.post(
     "/api/member",
@@ -168,87 +207,253 @@ app.post(
                 req.body.reEntryDate,
                 req.body.passportNumber,
                 req.body.passportExpiry,
-                req.file ? req.file.filename : null
-            ]
+                req.file
+                    ? req.file.filename
+                    : null
+            ],
+            err => {
+
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
+                        });
+                }
+
+                res.json({
+                    success: true
+                });
+
+            }
         );
 
-        res.json({
-            success: true
-        });
+    }
+);
 
-    });
+app.get(
+    "/api/members/:applicationId",
+    (req, res) => {
 
-app.get("/api/members/:applicationId", (req, res) => {
+        db.all(
+            `
+            SELECT *
+            FROM members
+            WHERE applicationId = ?
+            ORDER BY id DESC
+            `,
+            [req.params.applicationId],
+            (err, rows) => {
 
-    db.all(
-        `
-        SELECT *
-        FROM members
-        WHERE applicationId = ?
-        `,
-        [req.params.applicationId],
-        (err, rows) => {
-            res.json(rows);
-        }
-    );
-
-});
-
-app.get("/api/dashboard", (req, res) => {
-
-    db.all(
-        `SELECT * FROM applications`,
-        [],
-        (err, applications) => {
-
-            if (!applications.length)
-                return res.json([]);
-
-            let results = [];
-            let pending = applications.length;
-
-            applications.forEach(appItem => {
-
-                db.all(
-                    `
-                    SELECT *
-                    FROM members
-                    WHERE applicationId = ?
-                    `,
-                    [appItem.applicationId],
-                    (err, members) => {
-
-                        const progress =
-                            Math.round(
-                                (members.length /
-                                    appItem.memberCount) * 100
-                            );
-
-                        results.push({
-                            ...appItem,
-                            progress:
-                                progress > 100
-                                    ? 100
-                                    : progress,
-                            addedMembers:
-                                members.length
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
                         });
+                }
 
-                        pending--;
+                res.json(rows);
 
-                        if (pending === 0)
-                            res.json(results);
+            }
+        );
+
+    }
+);
+
+app.get(
+    "/api/member/:id",
+    (req, res) => {
+
+        db.get(
+            `
+            SELECT *
+            FROM members
+            WHERE id = ?
+            `,
+            [req.params.id],
+            (err, row) => {
+
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
+                        });
+                }
+
+                res.json(row);
+
+            }
+        );
+
+    }
+);
+
+app.put(
+    "/api/member/:id",
+    (req, res) => {
+
+        db.run(
+            `
+            UPDATE members
+            SET
+                fullName = ?,
+                nationality = ?,
+                passportNumber = ?,
+                jobTitle = ?
+            WHERE id = ?
+            `,
+            [
+                req.body.fullName,
+                req.body.nationality,
+                req.body.passportNumber,
+                req.body.jobTitle,
+                req.params.id
+            ],
+            err => {
+
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
+                        });
+                }
+
+                res.json({
+                    success: true
+                });
+
+            }
+        );
+
+    }
+);
+
+app.delete(
+    "/api/member/:id",
+    (req, res) => {
+
+        db.run(
+            `
+            DELETE FROM members
+            WHERE id = ?
+            `,
+            [req.params.id],
+            err => {
+
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
+                        });
+                }
+
+                res.json({
+                    success: true
+                });
+
+            }
+        );
+
+    }
+);
+
+/* ==========================
+   DASHBOARD
+========================== */
+
+app.get(
+    "/api/dashboard",
+    (req, res) => {
+
+        db.all(
+            `SELECT * FROM applications`,
+            [],
+            (err, applications) => {
+
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
+                        });
+                }
+
+                if (!applications.length) {
+                    return res.json([]);
+                }
+
+                let results = [];
+                let pending =
+                    applications.length;
+
+                applications.forEach(
+                    application => {
+
+                        db.all(
+                            `
+                            SELECT *
+                            FROM members
+                            WHERE applicationId = ?
+                            `,
+                            [
+                                application.applicationId
+                            ],
+                            (err, members) => {
+
+                                const progress =
+                                    Math.min(
+                                        100,
+                                        Math.round(
+                                            (
+                                                members.length /
+                                                application.memberCount
+                                            ) * 100
+                                        )
+                                    );
+
+                                results.push({
+                                    ...application,
+                                    progress,
+                                    addedMembers:
+                                        members.length
+                                });
+
+                                pending--;
+
+                                if (
+                                    pending === 0
+                                ) {
+                                    res.json(
+                                        results
+                                    );
+                                }
+
+                            }
+                        );
 
                     }
                 );
 
-            });
+            }
+        );
 
-        }
+    }
+);
+
+/* ==========================
+   START SERVER
+========================== */
+
+const PORT = 3000;
+
+app.listen(PORT, () => {
+
+    console.log(
+        `Running on http://localhost:${PORT}`
     );
 
-});
-
-app.listen(3000, () => {
-    console.log("Running on http://localhost:3000");
 });
