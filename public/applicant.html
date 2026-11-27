@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Application Dashboard</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .progress {
+            height: 30px;
+            background: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .bar {
+            height: 30px;
+            background: green;
+            width: 0%;
+        }
+
+        .complete {
+            color: green;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1 id="title">
+        Loading...
+    </h1>
+
+    <p id="stats"></p>
+
+    <div class="progress">
+        <div
+            id="bar"
+            class="bar">
+        </div>
+    </div>
+
+    <button id="addMember">
+        Add Member
+    </button>
+
+    <hr>
+
+    <h2>
+        Members Submitted
+    </h2>
+
+    <div id="members">
+        Loading...
+    </div>
+
+    <script>
+
+        const token =
+            new URLSearchParams(
+                window.location.search
+            ).get("token");
+
+        let appInfo;
+        let appId;
+
+        async function init() {
+
+            if (!token) {
+
+                document.body.innerHTML =
+                    "<h1>Invalid application link</h1>";
+
+                return;
+            }
+
+            const response =
+                await fetch(
+                    "/api/application/token/" +
+                    token
+                );
+
+            if (!response.ok) {
+
+                document.body.innerHTML =
+                    "<h1>Invalid application link</h1>";
+
+                return;
+            }
+
+            appInfo =
+                await response.json();
+
+            appId =
+                appInfo.applicationId;
+
+            document
+                .getElementById("title")
+                .innerText =
+                appInfo.bandName;
+
+            loadMembers();
+        }
+
+        async function loadMembers() {
+
+            const response =
+                await fetch(
+                    "/api/members/" +
+                    appId
+                );
+
+            const members =
+                await response.json();
+
+            const required =
+                appInfo.memberCount;
+
+            const added =
+                members.length;
+
+            const percent =
+                Math.min(
+                    100,
+                    Math.round(
+                        (
+                            added /
+                            required
+                        ) * 100
+                    )
+                );
+
+            document
+                .getElementById("stats")
+                .innerHTML =
+                `
+                Required Members:
+                ${required}
+                <br>
+                Submitted Members:
+                ${added}
+                `;
+
+            document
+                .getElementById("bar")
+                .style.width =
+                percent + "%";
+
+            let html = "";
+
+            if (!members.length) {
+
+                html =
+                    `
+                    <div class="card">
+                        No members submitted yet.
+                    </div>
+                    `;
+
+            } else {
+
+                members.forEach(m => {
+
+                    html += `
+                    <div class="card">
+
+                        <strong>
+                            ${m.fullName}
+                        </strong>
+
+                        <br>
+
+                        ${m.jobTitle || "No job title"}
+
+                        <br>
+
+                        ${m.passportNumber || ""}
+
+                    </div>
+                    `;
+
+                });
+
+            }
+
+            if (
+                added >= required
+            ) {
+
+                document
+                    .getElementById("stats")
+                    .innerHTML +=
+                    `
+                    <br><br>
+                    <span class="complete">
+                        ✓ Application Complete
+                    </span>
+                    `;
+            }
+
+            document
+                .getElementById("members")
+                .innerHTML =
+                html;
+        }
+
+        document
+            .getElementById("addMember")
+            .addEventListener(
+                "click",
+                () => {
+
+                    window.location =
+                        "/application.html?token=" +
+                        token;
+
+                }
+            );
+
+        init();
+
+    </script>
+
+</body>
+
+</html>

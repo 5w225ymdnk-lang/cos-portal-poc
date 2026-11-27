@@ -205,14 +205,14 @@
                     <br>
 
                     <strong>
-                        Magic Link
+                        Applicant Magic Link
                     </strong>
 
                     <br><br>
 
                     <input
                         readonly
-                        value="http://localhost:3000/application.html?token=${app.accessToken}">
+                        value="http://localhost:3000/applicant.html?token=${app.accessToken}">
 
                     <br><br>
 
@@ -222,8 +222,8 @@
                     </button>
 
                     <button
-                        onclick="window.location='/application.html?token=${app.accessToken}'">
-                        Open Application
+                        onclick="window.location='/applicant.html?token=${app.accessToken}'">
+                        Open Applicant Dashboard
                     </button>
 
                     <button
@@ -269,7 +269,7 @@
         function copyLink(token) {
 
             const link =
-                `http://localhost:3000/application.html?token=${token}`;
+                `http://localhost:3000/applicant.html?token=${token}`;
 
             navigator.clipboard.writeText(
                 link

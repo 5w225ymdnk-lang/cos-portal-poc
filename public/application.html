@@ -13,17 +13,6 @@
             padding: 20px;
         }
 
-        .progress {
-            height: 30px;
-            background: #ddd;
-        }
-
-        .bar {
-            height: 30px;
-            background: green;
-            width: 0%;
-        }
-
         #error {
             color: red;
             font-weight: bold;
@@ -36,18 +25,13 @@
 
 <body>
 
+    <a id="backLink">
+        ← Back To Application Dashboard
+    </a>
+
+    <br><br>
+
     <h1 id="title"></h1>
-
-    <p id="stats"></p>
-
-    <div class="progress">
-        <div
-            id="bar"
-            class="bar">
-        </div>
-    </div>
-
-    <hr>
 
     <div id="error"></div>
 
@@ -183,12 +167,6 @@
 
     </form>
 
-    <hr>
-
-    <h2>Current Members</h2>
-
-    <div id="members"></div>
-
     <script>
 
         const token =
@@ -237,103 +215,16 @@
         appId =
             appInfo.applicationId;
 
-            document
-                .getElementById("title")
-                .innerText =
-                appInfo.bandName;
+        document
+            .getElementById("backLink")
+            .href =
+            "/applicant.html?token=" +
+            token;
 
-            loadMembers();
-
-        }
-
-        async function loadMembers() {
-
-            const response =
-                await fetch(
-                    "/api/members/" +
-                    appId
-                );
-
-            const members =
-                await response.json();
-
-            document
-                .getElementById("stats")
-                .innerHTML =
-                `
-                Required:
-                ${appInfo.memberCount}
-                |
-                Added:
-                ${members.length}
-                `;
-
-            const percent =
-                Math.round(
-                    (
-                        members.length /
-                        appInfo.memberCount
-                    ) * 100
-                );
-
-            document
-                .getElementById("bar")
-                .style.width =
-                Math.min(
-                    percent,
-                    100
-                ) + "%";
-
-            if (
-                members.length >=
-                appInfo.memberCount
-            ) {
-
-                document
-                    .getElementById("stats")
-                    .innerHTML +=
-                    "<br><strong>Application Complete</strong>";
-            }
-
-
-            let html = "";
-
-            members.forEach(m => {
-
-                html += `
-                <div
-                style="
-                border:1px solid #ccc;
-                padding:10px;
-                margin:10px 0;
-                ">
-
-                    <b>${m.fullName}</b>
-
-                    <br>
-
-                    ${m.jobTitle || ""}
-
-                    <br>
-
-                    ${m.passportNumber || ""}
-
-                    <br><br>
-
-                    <button
-                        onclick="deleteMember(${m.id})">
-                        Delete
-                    </button>
-
-                </div>
-                `;
-
-            });
-
-            document
-                .getElementById("members")
-                .innerHTML =
-                html;
+        document
+            .getElementById("title")
+            .innerText =
+            appInfo.bandName;
 
         }
 
@@ -355,7 +246,6 @@
                 }
             );
 
-            loadMembers();
 
         }
 
@@ -555,7 +445,9 @@
 
                     e.target.reset();
 
-                    loadMembers();
+                    window.location =
+                        "/applicant.html?token=" +
+                        token;
 
                 }
             );
