@@ -2,82 +2,200 @@
 <html>
 
 <head>
+
     <title>Dashboard</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .progress {
+            height: 25px;
+            background: #ddd;
+        }
+
+        .bar {
+            height: 25px;
+            background: green;
+        }
+
+        .draft {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .complete {
+            color: green;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px;
+        }
+
+    </style>
+
 </head>
 
 <body>
 
     <h1>Applications Dashboard</h1>
 
-    <div id="apps"></div>
+    <button id="logoutButton">
+        Logout
+    </button>
+
+    <br><br>
+
+    <div id="applications">
+        Loading...
+    </div>
 
     <script>
 
-        async function load() {
+        async function checkAuth() {
 
             const response =
-                await fetch("/api/dashboard");
+                await fetch(
+                    "/api/auth/me"
+                );
 
-            const apps =
+            const auth =
+                await response.json();
+
+            if (!auth.authenticated) {
+
+                window.location =
+                    "/login.html";
+
+                return false;
+
+            }
+
+            return true;
+
+        }
+
+        async function load() {
+
+            const authorised =
+                await checkAuth();
+
+            if (!authorised) {
+                return;
+            }
+
+            const response =
+                await fetch(
+                    "/api/dashboard"
+                );
+
+            if (response.status === 401) {
+
+                window.location =
+                    "/login.html";
+
+                return;
+
+            }
+
+            const applications =
                 await response.json();
 
             let html = "";
 
-            apps.forEach(app => {
+            applications.forEach(app => {
 
-                const colour =
-                    app.progress >= 100
-                        ? "#0b8f00"
-                        : "#d77d00";
+                const status =
+                    app.draft
+                        ? '<span class="draft">Draft</span>'
+                        : '<span class="complete">Active</span>';
 
                 html += `
-                <a
-                    href="/application.html?id=${app.applicationId}"
-                    style="
-                        text-decoration:none;
-                        display:block;
-                    "
-                >
-                    <div
-                        style="
-                            background:${colour};
-                            color:white;
-                            padding:15px;
-                            margin-bottom:10px;
-                            border-radius:5px;
-                            cursor:pointer;
-                        "
-                    >
+                <div class="card">
 
-                        <b>${app.bandName}</b>
+                    <h3>
+                        ${app.bandName}
+                    </h3>
 
-                        <br><br>
+                    <p>
+                        ${status}
+                    </p>
 
-                        ${app.applicationId}
+                    <p>
+                        Contact:
+                        ${app.contactName}
+                    </p>
 
-                        <br><br>
+                    <p>
+                        Email:
+                        ${app.contactEmail}
+                    </p>
 
+                    <p>
                         Members:
                         ${app.addedMembers}
-                        of
+                        /
                         ${app.memberCount}
+                    </p>
 
-                        <br><br>
-
-                        Progress:
-                        ${app.progress}%
-
+                    <div class="progress">
+                        <div
+                            class="bar"
+                            style="
+                            width:${app.progress}%;
+                            ">
+                        </div>
                     </div>
-                </a>
+
+                    <br>
+
+                    <a
+                        href="/application.html?token=${app.accessToken}">
+                        Open Application
+                    </a>
+
+                </div>
                 `;
 
             });
 
             document
-                .getElementById("apps")
-                .innerHTML = html;
+                .getElementById("applications")
+                .innerHTML =
+                html;
 
         }
+
+        document
+            .getElementById("logoutButton")
+            .addEventListener(
+                "click",
+                async () => {
+
+                    await fetch(
+                        "/api/logout",
+                        {
+                            method: "POST"
+                        }
+                    );
+
+                    window.location =
+                        "/login.html";
+
+                }
+            );
 
         load();
 

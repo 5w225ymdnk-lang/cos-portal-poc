@@ -1,9 +1,23 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
+const session = require("express-session");
 const crypto = require("crypto");
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "admin";
 
 const app = express();
+
+app.use(
+    session({
+        secret: "change-this-secret",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 24 * 60 * 60 * 1000
+        }
+    })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,14 +31,32 @@ db.serialize(() => {
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             applicationId TEXT UNIQUE,
+            accessToken TEXT UNIQUE,
             bandName TEXT,
             contactName TEXT,
             contactEmail TEXT,
             memberCount INTEGER,
             venueList TEXT,
+            draft INTEGER DEFAULT 0,
             createdAt TEXT
         )
     `);
+
+    db.run(
+        `
+        ALTER TABLE applications
+        ADD COLUMN accessToken TEXT
+        `,
+        err => {}
+    );
+
+    db.run(
+        `
+        ALTER TABLE applications
+        ADD COLUMN draft INTEGER DEFAULT 0
+        `,
+        err => {}
+    );
 
     db.run(`
         CREATE TABLE IF NOT EXISTS members (
@@ -175,11 +207,15 @@ app.post("/api/application/draft", (req, res) => {
     const applicationId =
         "DRAFT-" + Date.now();
 
+    const accessToken =
+        crypto.randomUUID();
+
     db.run(
         `
         INSERT INTO applications
         (
             applicationId,
+            accessToken,
             bandName,
             contactName,
             contactEmail,
@@ -188,10 +224,11 @@ app.post("/api/application/draft", (req, res) => {
             createdAt,
             draft
         )
-        VALUES (?,?,?,?,?,?,?,1)
+        VALUES (?,?,?,?,?,?,?,?,1)
         `,
         [
             applicationId,
+            accessToken,
             req.body.bandName || "",
             req.body.contactName || "",
             req.body.contactEmail || "",
@@ -209,7 +246,8 @@ app.post("/api/application/draft", (req, res) => {
 
             res.json({
                 success: true,
-                applicationId
+                applicationId,
+                accessToken
             });
 
         }
@@ -504,12 +542,79 @@ app.delete(
     }
 );
 
+app.post("/api/login", (req, res) => {
+
+    const {
+        username,
+        password
+    } = req.body;
+
+    if (
+        username === ADMIN_USERNAME &&
+        password === ADMIN_PASSWORD
+    ) {
+
+        req.session.isAdmin = true;
+
+        return res.json({
+            success: true
+        });
+
+    }
+
+    res.status(401).json({
+        error: "Invalid credentials"
+    });
+
+});
+
+app.get("/api/auth/me", (req, res) => {
+
+    res.json({
+        authenticated:
+            !!req.session.isAdmin
+    });
+
+});
+
+app.post("/api/logout", (req, res) => {
+
+    req.session.destroy(() => {
+
+        res.json({
+            success: true
+        });
+
+    });
+
+});
+
+
 /* ==========================
    DASHBOARD
 ========================== */
 
+function requireAdmin(
+    req,
+    res,
+    next
+) {
+
+    if (!req.session.isAdmin) {
+
+        return res.status(401).json({
+            error: "Unauthorised"
+        });
+
+    }
+
+    next();
+
+}
+
 app.get(
     "/api/dashboard",
+    requireAdmin,
     (req, res) => {
 
         db.all(

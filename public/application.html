@@ -2,443 +2,538 @@
 <html>
 
 <head>
-<title>Application</title>
-<style>
-body{
-font-family:Arial;
-max-width:1000px;
-margin:auto;
-padding:20px;
-}
+    <title>Application</title>
 
-.progress{
-height:30px;
-background:#ddd;
-}
+    <style>
 
-.bar{
-height:30px;
-background:green;
-width:0%;
-}
-</style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .progress {
+            height: 30px;
+            background: #ddd;
+        }
+
+        .bar {
+            height: 30px;
+            background: green;
+            width: 0%;
+        }
+
+        #error {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+    </style>
+
 </head>
-
-<a href="/dashboard.html">
-    ← Return To Dashboard
-</a>
-
-<br><br>
 
 <body>
 
-<h1 id="title"></h1>
-
-<p id="stats"></p>
-
-<div class="progress">
-<div
-id="bar"
-class="bar">
-</div>
-</div>
-
-<hr>
-
-<div
-    id="error"
-    style="
-        color:red;
-        font-weight:bold;
-        margin-bottom:15px;
-    ">
-</div>
-
-<form
-id="memberForm"
-enctype="multipart/form-data">
-
-<h2>Add Member</h2>
-
-<input name="fullName" placeholder="Full Name" required>
-<br><br>
-
-<input name="nationality" placeholder="Nationality" required>
-<br><br>
-
-<input name="placeOfBirth" placeholder="Place Of Birth">
-<br><br>
-
-<input name="countryOfBirth" placeholder="Country Of Birth">
-<br><br>
-
-<textarea
-name="homeAddress"
-placeholder="Home Address"></textarea>
-
-<br><br>
-
-<label>First Entry Date</label>
-<br>
-<input type="date" name="firstEntryDate">
-
-<br><br>
-
-<label>Final Exit Date</label>
-<br>
-<input type="date" name="finalExitDate">
-
-<br><br>
-
-<input
-type="number"
-name="showCount"
-placeholder="Number Of Shows">
-
-<br><br>
-
-<input
-name="earnings"
-placeholder="Earnings">
-
-<br><br>
-
-<input
-name="jobTitle"
-placeholder="Job Title">
-
-<br><br>
-
-<select name="travellingFromIreland">
-<option>No</option>
-<option>Yes</option>
-</select>
-
-<br><br>
-
-<select name="reEnteringUk">
-<option>No</option>
-<option>Yes</option>
-</select>
-
-<br><br>
-
-<label>First Exit Date</label>
-<br>
-<input type="date" name="firstExitDate">
-
-<br><br>
-
-<label>Re-entry Date</label>
-<br>
-<input type="date" name="reEntryDate">
-
-<br><br>
-
-<input
-name="passportNumber"
-placeholder="Passport Number">
-
-<br><br>
-
-<label>Passport Expiry</label>
-<br>
-
-<input
-type="date"
-name="passportExpiry">
-
-<br><br>
-
-<label>Passport Upload</label>
-<br>
-
-<input
-type="file"
-name="passport"
-required>
-
-<br><br>
-
-<button>
-Save Member
-</button>
-
-</form>
-
-<hr>
-
-<h2>Current Members</h2>
-
-<div id="members"></div>
-
-<script>
-
-const token =
-new URLSearchParams(
-window.location.search
-).get("token");
-
-let appInfo;
-
-async function init(){
-
-const response =
-await fetch(
-"/api/application/" + token
-);
-
-appInfo =
-await response.json();
-
-const appId =
-    appInfo.applicationId;
-
-document
-.getElementById("title")
-.innerText =
-appInfo.bandName;
-
-loadMembers();
-
-}
-
-async function loadMembers(){
-
-const response =
-await fetch(
-"/api/members/" + appId
-);
-
-const members =
-await response.json();
-
-document
-.getElementById("stats")
-.innerHTML =
-`
-Required:
-${appInfo.memberCount}
-|
-Added:
-${members.length}
-`;
-
-const percent =
-Math.round(
-(members.length /
-appInfo.memberCount)
-* 100
-);
-
-document
-.getElementById("bar")
-.style.width =
-percent + "%";
-
-let html = "";
-
-members.forEach(m=>{
-    html += `
-    <div style="
-    border:1px solid #ccc;
-    padding:10px;
-    margin:10px 0;
-    ">
-
-    <b>${m.fullName}</b>
-
-    <br>
-
-    ${m.jobTitle}
-
-    <br>
-
-    ${m.passportNumber}
+    <a href="/dashboard.html">
+        ← Return To Dashboard
+    </a>
 
     <br><br>
 
-    <button
-        onclick="deleteMember(${m.id})">
-        Delete
-    </button>
+    <h1 id="title"></h1>
 
+    <p id="stats"></p>
+
+    <div class="progress">
+        <div
+            id="bar"
+            class="bar">
+        </div>
     </div>
-    `;
-});
 
-document
-.getElementById("members")
-.innerHTML =
-html;
+    <hr>
 
-}
+    <div id="error"></div>
 
-.getElementById("memberForm")
-.addEventListener(
-    "submit",
-    async e => {
+    <form
+        id="memberForm"
+        enctype="multipart/form-data">
 
-        e.preventDefault();
+        <h2>Add Member</h2>
 
-        const form =
-            new FormData(e.target);
+        <input
+            name="fullName"
+            placeholder="Full Name"
+            required>
 
-        const fullName =
-            form.get("fullName")
-                ?.trim();
+        <br><br>
 
-        const nationality =
-            form.get("nationality")
-                ?.trim();
+        <input
+            name="nationality"
+            placeholder="Nationality"
+            required>
 
-        const passportNumber =
-            form.get("passportNumber")
-                ?.trim();
+        <br><br>
 
-        const passportExpiry =
-            form.get("passportExpiry");
+        <input
+            name="placeOfBirth"
+            placeholder="Place Of Birth">
 
-        const firstEntryDate =
-            form.get("firstEntryDate");
+        <br><br>
 
-        const finalExitDate =
-            form.get("finalExitDate");
+        <input
+            name="countryOfBirth"
+            placeholder="Country Of Birth">
 
-        const reEnteringUk =
-            form.get("reEnteringUk");
+        <br><br>
 
-        const firstExitDate =
-            form.get("firstExitDate");
+        <textarea
+            name="homeAddress"
+            placeholder="Home Address"></textarea>
 
-        const reEntryDate =
-            form.get("reEntryDate");
+        <br><br>
 
-        if (!fullName) {
-            alert("Full name is required");
-            return;
-        }
+        <label>First Entry Date</label>
+        <br>
+        <input
+            type="date"
+            name="firstEntryDate">
 
-        if (fullName.length < 2) {
-            alert("Full name is too short");
-            return;
-        }
+        <br><br>
 
-        if (!nationality) {
-            alert("Nationality is required");
-            return;
-        }
+        <label>Final Exit Date</label>
+        <br>
+        <input
+            type="date"
+            name="finalExitDate">
 
-        if (!passportNumber) {
-            document.getElementById("error").innerText =
-                "Passport number is required";
-            return;
-        }
+        <br><br>
 
-        if (passportNumber.length < 6) {
-            alert(
-                "Passport number must be at least 6 characters"
-            );
-            return;
-        }
+        <input
+            type="number"
+            name="showCount"
+            placeholder="Number Of Shows">
 
-        if (!passportExpiry) {
-            alert("Passport expiry is required");
-            return;
-        }
+        <br><br>
 
-        const today =
-            new Date();
+        <input
+            name="earnings"
+            placeholder="Earnings">
 
-        const passportDate =
-            new Date(passportExpiry);
+        <br><br>
 
-        if (passportDate <= today) {
-            alert(
-                "Passport has expired"
-            );
-            return;
-        }
+        <input
+            name="jobTitle"
+            placeholder="Job Title">
 
-        if (
-            firstEntryDate &&
-            finalExitDate &&
-            new Date(finalExitDate) <
-            new Date(firstEntryDate)
-        ) {
-            alert(
-                "Final exit date must be after first entry date"
-            );
-            return;
-        }
+        <br><br>
 
-        if (
-            reEnteringUk === "Yes"
-        ) {
+        <select name="travellingFromIreland">
+            <option>No</option>
+            <option>Yes</option>
+        </select>
 
-            if (
-                !firstExitDate ||
-                !reEntryDate
-            ) {
+        <br><br>
 
-                alert(
-                    "First exit and re-entry dates are required"
+        <select name="reEnteringUk">
+            <option>No</option>
+            <option>Yes</option>
+        </select>
+
+        <br><br>
+
+        <label>First Exit Date</label>
+        <br>
+        <input
+            type="date"
+            name="firstExitDate">
+
+        <br><br>
+
+        <label>Re-entry Date</label>
+        <br>
+        <input
+            type="date"
+            name="reEntryDate">
+
+        <br><br>
+
+        <input
+            name="passportNumber"
+            placeholder="Passport Number">
+
+        <br><br>
+
+        <label>Passport Expiry</label>
+        <br>
+        <input
+            type="date"
+            name="passportExpiry">
+
+        <br><br>
+
+        <label>Passport Upload</label>
+        <br>
+        <input
+            type="file"
+            name="passport"
+            required>
+
+        <br><br>
+
+        <button type="submit">
+            Save Member
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Current Members</h2>
+
+    <div id="members"></div>
+
+    <script>
+
+        const token =
+            new URLSearchParams(
+                window.location.search
+            ).get("token");
+
+        let appInfo;
+        let appId;
+
+        async function init() {
+
+            const response =
+                await fetch(
+                    "/api/application/token/" +
+                    token
                 );
 
+            appInfo =
+                await response.json();
+
+            appId =
+                appInfo.applicationId;
+
+            document
+                .getElementById("title")
+                .innerText =
+                appInfo.bandName;
+
+            loadMembers();
+
+        }
+
+        async function loadMembers() {
+
+            const response =
+                await fetch(
+                    "/api/members/" +
+                    appId
+                );
+
+            const members =
+                await response.json();
+
+            document
+                .getElementById("stats")
+                .innerHTML =
+                `
+                Required:
+                ${appInfo.memberCount}
+                |
+                Added:
+                ${members.length}
+                `;
+
+            const percent =
+                Math.round(
+                    (
+                        members.length /
+                        appInfo.memberCount
+                    ) * 100
+                );
+
+            document
+                .getElementById("bar")
+                .style.width =
+                Math.min(
+                    percent,
+                    100
+                ) + "%";
+
+            let html = "";
+
+            members.forEach(m => {
+
+                html += `
+                <div
+                style="
+                border:1px solid #ccc;
+                padding:10px;
+                margin:10px 0;
+                ">
+
+                    <b>${m.fullName}</b>
+
+                    <br>
+
+                    ${m.jobTitle || ""}
+
+                    <br>
+
+                    ${m.passportNumber || ""}
+
+                    <br><br>
+
+                    <button
+                        onclick="deleteMember(${m.id})">
+                        Delete
+                    </button>
+
+                </div>
+                `;
+
+            });
+
+            document
+                .getElementById("members")
+                .innerHTML =
+                html;
+
+        }
+
+        async function deleteMember(id) {
+
+            const confirmed =
+                confirm(
+                    "Delete member?"
+                );
+
+            if (!confirmed) {
                 return;
             }
 
-            if (
-                new Date(reEntryDate) <
-                new Date(firstExitDate)
-            ) {
-
-                alert(
-                    "Re-entry date must be after first exit date"
-                );
-
-                return;
-            }
-
-        }
-
-        form.append(
-            "applicationId",
-            appId
-        );
-
-        const response =
             await fetch(
-                "/api/member",
+                "/api/member/" + id,
                 {
-                    method: "POST",
-                    body: form
+                    method: "DELETE"
                 }
             );
 
-        const data =
-            await response.json();
+            loadMembers();
 
-        if (!response.ok) {
-
-            alert(
-                data.error ||
-                "Unable to save member"
-            );
-
-            return;
         }
 
-        e.target.reset();
+        document
+            .getElementById("memberForm")
+            .addEventListener(
+                "submit",
+                async e => {
 
-        loadMembers();
+                    e.preventDefault();
 
-    }
-);
+                    document
+                        .getElementById("error")
+                        .innerText = "";
 
-init();
+                    const form =
+                        new FormData(
+                            e.target
+                        );
 
-</script>
+                    const fullName =
+                        form.get("fullName")
+                            ?.trim();
+
+                    const nationality =
+                        form.get("nationality")
+                            ?.trim();
+
+                    const passportNumber =
+                        form.get("passportNumber")
+                            ?.trim();
+
+                    const passportExpiry =
+                        form.get(
+                            "passportExpiry"
+                        );
+
+                    const firstEntryDate =
+                        form.get(
+                            "firstEntryDate"
+                        );
+
+                    const finalExitDate =
+                        form.get(
+                            "finalExitDate"
+                        );
+
+                    const reEnteringUk =
+                        form.get(
+                            "reEnteringUk"
+                        );
+
+                    const firstExitDate =
+                        form.get(
+                            "firstExitDate"
+                        );
+
+                    const reEntryDate =
+                        form.get(
+                            "reEntryDate"
+                        );
+
+                    const errorElement =
+                        document
+                            .getElementById(
+                                "error"
+                            );
+
+                    if (!fullName) {
+                        errorElement.innerText =
+                            "Full name is required";
+                        return;
+                    }
+
+                    if (fullName.length < 2) {
+                        errorElement.innerText =
+                            "Full name is too short";
+                        return;
+                    }
+
+                    if (!nationality) {
+                        errorElement.innerText =
+                            "Nationality is required";
+                        return;
+                    }
+
+                    if (!passportNumber) {
+                        errorElement.innerText =
+                            "Passport number is required";
+                        return;
+                    }
+
+                    if (passportNumber.length < 6) {
+                        errorElement.innerText =
+                            "Passport number must be at least 6 characters";
+                        return;
+                    }
+
+                    if (!passportExpiry) {
+                        errorElement.innerText =
+                            "Passport expiry is required";
+                        return;
+                    }
+
+                    const today =
+                        new Date();
+
+                    const passportDate =
+                        new Date(
+                            passportExpiry
+                        );
+
+                    if (
+                        passportDate <= today
+                    ) {
+                        errorElement.innerText =
+                            "Passport has expired";
+                        return;
+                    }
+
+                    if (
+                        firstEntryDate &&
+                        finalExitDate &&
+                        new Date(
+                            finalExitDate
+                        ) <
+                        new Date(
+                            firstEntryDate
+                        )
+                    ) {
+                        errorElement.innerText =
+                            "Final exit date must be after first entry date";
+                        return;
+                    }
+
+                    if (
+                        reEnteringUk ===
+                        "Yes"
+                    ) {
+
+                        if (
+                            !firstExitDate ||
+                            !reEntryDate
+                        ) {
+
+                            errorElement.innerText =
+                                "First exit and re-entry dates are required";
+
+                            return;
+                        }
+
+                        if (
+                            new Date(
+                                reEntryDate
+                            ) <
+                            new Date(
+                                firstExitDate
+                            )
+                        ) {
+
+                            errorElement.innerText =
+                                "Re-entry date must be after first exit date";
+
+                            return;
+                        }
+
+                    }
+
+                    form.append(
+                        "applicationId",
+                        appId
+                    );
+
+                    const response =
+                        await fetch(
+                            "/api/member",
+                            {
+                                method: "POST",
+                                body: form
+                            }
+                        );
+
+                    const data =
+                        await response.json();
+
+                    if (
+                        !response.ok
+                    ) {
+
+                        errorElement.innerText =
+                            data.error ||
+                            "Unable to save member";
+
+                        return;
+
+                    }
+
+                    e.target.reset();
+
+                    loadMembers();
+
+                }
+            );
+
+        init();
+
+    </script>
 
 </body>
+
 </html>

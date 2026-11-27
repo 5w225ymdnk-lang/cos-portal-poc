@@ -78,7 +78,9 @@
 
         <br><br>
 
-        <button>Create Application</button>
+        <button type="submit">
+            Create Application
+        </button>
 
         <br><br>
 
@@ -177,6 +179,13 @@
                         return;
                     }
 
+                    const submitButton =
+                        document.querySelector(
+                            'button[type="submit"]'
+                        );
+
+                    submitButton.disabled = true;
+
                     try {
 
                         const response =
@@ -208,61 +217,105 @@
                                 "Unable to create application";
 
                             return;
+
                         }
 
                         window.location =
                             "/application.html?token=" +
                             data.accessToken;
 
-                    } catch (error) {
+                    }
+                    catch {
 
                         errorElement.innerText =
                             "Unable to create application.";
 
                     }
+                    finally {
+
+                        submitButton.disabled = false;
+
+                    }
 
                 }
             );
+
         document
-        .getElementById("saveDraft")
-        .addEventListener(
-            "click",
-            async () => {
+            .getElementById("saveDraft")
+            .addEventListener(
+                "click",
+                async () => {
 
-                const response =
-                    await fetch(
-                        "/api/application/draft",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-                            body: JSON.stringify({
-                                bandName:
-                                    document.getElementById("bandName").value,
-                                contactName:
-                                    document.getElementById("contactName").value,
-                                contactEmail:
-                                    document.getElementById("contactEmail").value,
-                                memberCount:
-                                    document.getElementById("memberCount").value,
-                                venueList:
-                                    document.getElementById("venueList").value
-                            })
+                    const errorElement =
+                        document
+                            .getElementById("error");
+
+                    errorElement.innerText = "";
+
+                    const draftButton =
+                        document
+                            .getElementById("saveDraft");
+
+                    draftButton.disabled = true;
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                "/api/application/draft",
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        bandName:
+                                            document.getElementById("bandName").value,
+                                        contactName:
+                                            document.getElementById("contactName").value,
+                                        contactEmail:
+                                            document.getElementById("contactEmail").value,
+                                        memberCount:
+                                            document.getElementById("memberCount").value,
+                                        venueList:
+                                            document.getElementById("venueList").value
+                                    })
+                                }
+                            );
+
+                        const data =
+                            await response.json();
+
+                        if (!response.ok) {
+
+                            errorElement.innerText =
+                                data.error ||
+                                "Unable to save draft";
+
+                            return;
+
                         }
-                    );
 
-                const data =
-                    await response.json();
+                        window.location =
+                            "/application.html?token=" +
+                            data.accessToken;
 
-                alert(
-                    "Draft saved: " +
-                    data.applicationId
-                );
+                    }
+                    catch {
 
-            }
-        );
+                        errorElement.innerText =
+                            "Unable to save draft.";
+
+                    }
+                    finally {
+
+                        draftButton.disabled = false;
+
+                    }
+
+                }
+            );
 
     </script>
 
