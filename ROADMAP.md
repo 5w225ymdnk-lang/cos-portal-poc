@@ -1,27 +1,31 @@
-# Sprint 1
+Sprint 1
+✅ Dashboard
+✅ Progress bar
+✅ Member CRUD
 
-- [x] Application dashboard
-- [x] Edit member API
-- [x] Delete member
-- [x] Return link
-- [x] Progress bar
+Sprint 2
+✅ Validation
+✅ Applicant access tokens
+✅ Admin authentication
+⬜ Save drafts
+⬜ Email reminders
 
-# Sprint 2
+Sprint 3
+⬜ Passport OCR
+⬜ AI validation
+⬜ Member edit UI
 
-- [ ] Validation
-- [ ] Email reminders
-- [ ] Venue management
-- [ ] Save drafts
+Sprint 4
+⬜ Stripe integration
+⬜ Email notifications
 
-# Sprint 3
+Sprint 5
+⬜ Home Office SMS automation
 
-- [ ] Passport OCR
-- [ ] AI validation
-
-# Sprint 4
-
-- [ ] Stripe integration
-
-# Sprint 5
-
-- [ ] Home Office SMS automation
+Backlog
+⬜ Venue management
+⬜ Applicant self-service completion
+⬜ Admin notes
+⬜ Application status workflow
+⬜ Export to PDF
+⬜ Audit logging

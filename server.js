@@ -303,6 +303,12 @@ app.get(
                     });
                 }
 
+                if (!row) {
+                    return res.status(404).json({
+                        error: "Application not found"
+                    });
+                }
+
                 res.json(row);
 
             }
@@ -685,6 +691,52 @@ app.get(
 
                     }
                 );
+
+            }
+        );
+
+    }
+);
+
+app.post(
+    "/api/recover",
+    async (req, res) => {
+
+        const email =
+            req.body.email;
+
+        db.all(
+            `
+            SELECT *
+            FROM applications
+            WHERE contactEmail = ?
+            `,
+            [email],
+            async (err, rows) => {
+
+                if (err) {
+
+                    return res
+                        .status(500)
+                        .json({
+                            error: err.message
+                        });
+
+                }
+
+                if (!rows.length) {
+
+                    return res.json({
+                        success: true
+                    });
+
+                }
+
+                const links =
+                    rows.map(
+                        app =>
+                            `http://localhost:3000/application.html?token=${app.accessToken}`
+                    ).join("\n");
 
             }
         );
