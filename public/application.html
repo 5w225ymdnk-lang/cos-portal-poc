@@ -24,6 +24,12 @@ width:0%;
 </style>
 </head>
 
+<a href="/dashboard.html">
+    ← Return To Dashboard
+</a>
+
+<br><br>
+
 <body>
 
 <h1 id="title"></h1>
@@ -221,27 +227,32 @@ percent + "%";
 let html = "";
 
 members.forEach(m=>{
+    html += `
+    <div style="
+    border:1px solid #ccc;
+    padding:10px;
+    margin:10px 0;
+    ">
 
-html += `
-<div style="
-border:1px solid #ccc;
-padding:10px;
-margin:10px 0;
-">
+    <b>${m.fullName}</b>
 
-<b>${m.fullName}</b>
+    <br>
 
-<br>
+    ${m.jobTitle}
 
-${m.jobTitle}
+    <br>
 
-<br>
+    ${m.passportNumber}
 
-${m.passportNumber}
+    <br><br>
 
-</div>
-`;
+    <button
+        onclick="deleteMember(${m.id})">
+        Delete
+    </button>
 
+    </div>
+    `;
 });
 
 document
@@ -281,6 +292,28 @@ loadMembers();
 
 }
 );
+
+async function deleteMember(id){
+
+    const confirmed =
+        confirm(
+            "Delete member?"
+        );
+
+    if(!confirmed){
+        return;
+    }
+
+    await fetch(
+        "/api/member/" + id,
+        {
+            method:"DELETE"
+        }
+    );
+
+    loadMembers();
+
+}
 
 init();
 
