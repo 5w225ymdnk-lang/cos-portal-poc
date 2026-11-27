@@ -80,6 +80,14 @@
 
         <button>Create Application</button>
 
+        <br><br>
+
+        <button
+            type="button"
+            id="saveDraft">
+            Save Draft
+        </button>
+
     </form>
 
     <script>
@@ -193,6 +201,15 @@
                         const data =
                             await response.json();
 
+                        if (!response.ok) {
+
+                            errorElement.innerText =
+                                data.error ||
+                                "Unable to create application";
+
+                            return;
+                        }
+
                         window.location =
                             "/application.html?id=" +
                             data.applicationId;
@@ -206,6 +223,46 @@
 
                 }
             );
+        document
+        .getElementById("saveDraft")
+        .addEventListener(
+            "click",
+            async () => {
+
+                const response =
+                    await fetch(
+                        "/api/application/draft",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify({
+                                bandName:
+                                    document.getElementById("bandName").value,
+                                contactName:
+                                    document.getElementById("contactName").value,
+                                contactEmail:
+                                    document.getElementById("contactEmail").value,
+                                memberCount:
+                                    document.getElementById("memberCount").value,
+                                venueList:
+                                    document.getElementById("venueList").value
+                            })
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                alert(
+                    "Draft saved: " +
+                    data.applicationId
+                );
+
+            }
+        );
 
     </script>
 

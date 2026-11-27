@@ -163,6 +163,53 @@ app.post("/api/application", (req, res) => {
 
 });
 
+app.post("/api/application/draft", (req, res) => {
+
+    const applicationId =
+        "DRAFT-" + Date.now();
+
+    db.run(
+        `
+        INSERT INTO applications
+        (
+            applicationId,
+            bandName,
+            contactName,
+            contactEmail,
+            memberCount,
+            venueList,
+            createdAt,
+            draft
+        )
+        VALUES (?,?,?,?,?,?,?,1)
+        `,
+        [
+            applicationId,
+            req.body.bandName || "",
+            req.body.contactName || "",
+            req.body.contactEmail || "",
+            req.body.memberCount || 0,
+            req.body.venueList || "",
+            new Date().toISOString()
+        ],
+        err => {
+
+            if (err) {
+                return res.status(500).json({
+                    error: err.message
+                });
+            }
+
+            res.json({
+                success: true,
+                applicationId
+            });
+
+        }
+    );
+
+});
+
 app.get(
     "/api/application/:id",
     (req, res) => {

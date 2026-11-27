@@ -5,6 +5,11 @@ const db = new sqlite3.Database("database.db");
 db.serialize(() => {
 
     db.run(`
+        ALTER TABLE applications
+        ADD COLUMN draft INTEGER DEFAULT 0
+    `, err => {});
+
+    db.run(`
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             applicationId TEXT UNIQUE,
