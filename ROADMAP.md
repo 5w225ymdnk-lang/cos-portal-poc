@@ -1,10 +1,10 @@
 # Sprint 1
 
-- [ ] Application dashboard
-- [ ] Edit member
-- [ ] Delete member
-- [ ] Return link
-- [ ] Progress bar
+- [x] Application dashboard
+- [x] Edit member API
+- [x] Delete member
+- [x] Return link
+- [x] Progress bar
 
 # Sprint 2
 
