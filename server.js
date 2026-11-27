@@ -317,6 +317,59 @@ app.get(
     }
 );
 
+app.delete(
+    "/api/application/:id",
+    requireAdmin,
+    (req, res) => {
+
+        const applicationId =
+            req.params.id;
+
+        db.run(
+            `
+            DELETE FROM members
+            WHERE applicationId = ?
+            `,
+            [applicationId],
+            err => {
+
+                if (err) {
+
+                    return res.status(500).json({
+                        error: err.message
+                    });
+
+                }
+
+                db.run(
+                    `
+                    DELETE FROM applications
+                    WHERE applicationId = ?
+                    `,
+                    [applicationId],
+                    err => {
+
+                        if (err) {
+
+                            return res.status(500).json({
+                                error: err.message
+                            });
+
+                        }
+
+                        res.json({
+                            success: true
+                        });
+
+                    }
+                );
+
+            }
+        );
+
+    }
+);
+
 /* ==========================
    MEMBERS
 ========================== */

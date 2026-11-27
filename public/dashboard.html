@@ -42,6 +42,13 @@
 
         button {
             padding: 10px;
+            cursor: pointer;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
     </style>
@@ -58,11 +65,19 @@
 
     <br><br>
 
+    <input
+        id="search"
+        placeholder="Search by band, contact or email">
+
+    <br><br>
+
     <div id="applications">
         Loading...
     </div>
 
     <script>
+
+        let allApplications = [];
 
         async function checkAuth() {
 
@@ -110,8 +125,33 @@
 
             }
 
-            const applications =
+            allApplications =
                 await response.json();
+
+            renderApplications(
+                allApplications
+            );
+
+        }
+
+        function renderApplications(
+            applications
+        ) {
+
+            if (!applications.length) {
+
+                document
+                    .getElementById("applications")
+                    .innerHTML =
+                    `
+                    <div class="card">
+                        No applications found.
+                    </div>
+                    `;
+
+                return;
+
+            }
 
             let html = "";
 
@@ -154,7 +194,7 @@
                         <div
                             class="bar"
                             style="
-                            width:${app.progress}%;
+                                width:${app.progress}%;
                             ">
                         </div>
                     </div>
@@ -166,20 +206,94 @@
                         Open Application
                     </a>
 
+                    <br><br>
+
+                    <button
+                        onclick="deleteApplication('${app.applicationId}')">
+                        Delete Application
+                    </button>
+
                 </div>
                 `;
 
             });
 
             document
-                .getElementById("applications")
+                .getElementById(
+                    "applications"
+                )
                 .innerHTML =
                 html;
 
         }
 
+        async function deleteApplication(
+            applicationId
+        ) {
+
+            const confirmed =
+                confirm(
+                    "Delete this application?"
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            await fetch(
+                "/api/application/" +
+                applicationId,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            load();
+
+        }
+
         document
-            .getElementById("logoutButton")
+            .getElementById("search")
+            .addEventListener(
+                "input",
+                e => {
+
+                    const term =
+                        e.target.value
+                            .toLowerCase();
+
+                    const filtered =
+                        allApplications.filter(
+                            app =>
+
+                                app.bandName
+                                    .toLowerCase()
+                                    .includes(term)
+
+                                ||
+
+                                app.contactName
+                                    .toLowerCase()
+                                    .includes(term)
+
+                                ||
+
+                                app.contactEmail
+                                    .toLowerCase()
+                                    .includes(term)
+                        );
+
+                    renderApplications(
+                        filtered
+                    );
+
+                }
+            );
+
+        document
+            .getElementById(
+                "logoutButton"
+            )
             .addEventListener(
                 "click",
                 async () => {
