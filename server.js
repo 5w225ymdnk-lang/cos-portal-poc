@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
@@ -22,6 +23,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.get("/", (req, res) => {
+    res.redirect("/dashboard.html");
+});
 
 const db = new sqlite3.Database("database.db");
 
